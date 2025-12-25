@@ -1,0 +1,31 @@
+feat: enhance presentation layer with new controller and improved service registration
+
+- Add ProjectController with paginated projects endpoint
+  - Implements GET /api/project with size and page parameters
+  - Returns PagedResponse<ProjectCardDto> with proper pagination metadata
+  - Uses ProjectSpec specification for efficient data retrieval
+
+- Implement service registration via extension methods
+  - Utilize AddBusinessLayer() extension method for clean service registration
+  - Centralized dependency injection configuration in ServiceCollectionExtensions
+  - Maintains separation of concerns between presentation and business layers
+
+- Expand technology stack in database seeding
+  - Add Angular frontend framework technology
+  - Add Oracle database technology  
+  - Enhanced seed data with 12 technologies across multiple categories
+
+- Maintain clean architecture patterns
+  - Business logic isolated in BLL layer
+  - Presentation layer focuses on HTTP concerns only
+  - Proper error handling and validation throughout
+
+- Fix minor configuration issues
+  - Remove duplicate AddEndpointsApiExplorer() call in Program.cs
+  - Ensure consistent API routing patterns across controllers
+
+Changes include:
+• New ProjectController with pagination support
+• Enhanced DbInitializer with Angular and Oracle technologies
+• Consolidated service registration using extension methods
+• Improved maintainability and testability through clean architecture
