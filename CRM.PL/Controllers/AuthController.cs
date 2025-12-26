@@ -25,6 +25,9 @@ namespace CRM.PL.Controllers
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Login to get JWT token
+        /// </summary>
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<ActionResult<ApiResponse<LoginResponseDto>>> Login(
@@ -45,14 +48,14 @@ namespace CRM.PL.Controllers
                 if (user == null)
                 {
                     return Unauthorized(ApiResponse<LoginResponseDto>.Failure(
-                        "البريد الإلكتروني أو كلمة المرور غير صحيحة"));
+                        "Invalid email or password"));
                 }
 
                 var isPasswordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
                 if (!isPasswordValid)
                 {
                     return Unauthorized(ApiResponse<LoginResponseDto>.Failure(
-                        "البريد الإلكتروني أو كلمة المرور غير صحيحة"));
+                        "Invalid email or password"));
                 }
 
                 var token = await _tokenService.GenerateTokenAsync(user, _userManager);
@@ -66,37 +69,68 @@ namespace CRM.PL.Controllers
                     ExpiresAt = DateTime.UtcNow.AddDays(expiryDays)
                 };
 
-                return Ok(ApiResponse<LoginResponseDto>.Success(response, "تم تسجيل الدخول بنجاح"));
+                return Ok(ApiResponse<LoginResponseDto>.Success(
+                    response,
+                    "Login successful"));
             }
             catch (Exception ex)
             {
                 return StatusCode(500, ApiResponse<LoginResponseDto>.Failure(
-                    $"حدث خطأ: {ex.Message}"));
+                    $"An error occurred: {ex.Message}"));
             }
         }
 
+        /// <summary>
+        /// Validate the current JWT token
+        /// </summary>
         [HttpGet("validate")]
         [Authorize]
-        public ActionResult<ApiResponse<object>> ValidateToken()
+        public ActionResult<ApiResponse<TokenValidationDto>> ValidateToken()
         {
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            var userName = User.FindFirst("userName")?.Value;
-
-            return Ok(ApiResponse<object>.Success(new
+            try
             {
-                IsValid = true,
-                Email = email,
-                UserName = userName
-            }));
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                var userName = User.FindFirst("userName")?.Value;
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                var response = new TokenValidationDto
+                {
+                    IsValid = true,
+                    UserId = userId,
+                    Email = email,
+                    UserName = userName
+                };
+
+                return Ok(ApiResponse<TokenValidationDto>.Success(
+                    response,
+                    "Token is valid"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<TokenValidationDto>.Failure(
+                    $"An error occurred: {ex.Message}"));
+            }
         }
 
+        /// <summary>
+        /// Logout (client-side token removal)
+        /// </summary>
         [HttpPost("logout")]
         [Authorize]
         public ActionResult<ApiResponse<bool>> Logout()
         {
-            // For JWT, logout is handled on client side by removing token
-            return Ok(ApiResponse<bool>.Success(true, "تم تسجيل الخروج بنجاح"));
+            try
+            {
+                // For JWT, logout is handled on client side by removing token
+                return Ok(ApiResponse<bool>.Success(
+                    true,
+                    "Logout successful"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<bool>.Failure(
+                    $"An error occurred: {ex.Message}"));
+            }
         }
     }
 }
-

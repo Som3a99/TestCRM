@@ -104,6 +104,36 @@ namespace CRM.BLL.Services
 
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
+
+        /// <summary>
+        /// Update programmer image path
+        /// </summary>
+        public async Task<bool> UpdateImageAsync(int id, string imagePath)
+        {
+            try
+            {
+                var programmer = await _unitOfWork.Programmers.GetByIdAsync(id);
+                if (programmer == null || programmer.IsDeleted)
+                {
+                    return false;
+                }
+
+                programmer.ImagePath = imagePath;
+                programmer.UpdatedAt = DateTime.Now;
+
+                _unitOfWork.Programmers.Update(programmer);
+
+                // Clear cache for this programmer
+                _cache.Remove($"programmer_details_{id}");
+                _cache.Remove("active_programmers");
+
+                return await _unitOfWork.SaveChangesAsync() > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 
 }

@@ -10,5 +10,6 @@ namespace CRM.BLL.Interfaces.Services
         Task<IEnumerable<ProgrammerCardDto>> GetActiveAsync();
         Task<ProgrammerDetailsDto?> GetByIdAsync(int id);
         Task<bool> DeactivateAsync(int id);
+        Task<bool> UpdateImageAsync(int id, string imagePath);
     }
 }
